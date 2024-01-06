@@ -1,7 +1,8 @@
+; liste agenta za popis za kupovinu i kolica sa kupljenim proizvodima
 turtles-own [
-  shopping-list
-  shopping-cart
-]
+              shopping-list
+              shopping-cart
+            ]
 
 to setup
   clear-all
@@ -10,60 +11,80 @@ to setup
   create-turtles 1
   [
     set shopping-cart []
-    ; slučajno određivanje broja i artikala u popisu za kupovinu
-    let num-items random 5 + 1 ; od 1 do 5 artikala
-    set shopping-list n-of num-items ["Green" "Orange" "Blue" "Red" "Yellow" "White" "Grey"]
-    setxy random-pxcor random-pycor ; slučajna pozicija agenta
+
+    ; slučajno određivanje popisa za kupovinu
+    set shopping-list n-values (random 5) [ one-of ["Green" "Orange" "Blue" "Red" "Grey" "Yellow" "White"] ]
+    setxy -8 -6
+    set heading 90
     show shopping-list
   ]
 
   ; slučajno postavljanje "asortimana" trgovine
-  ask n-of (random 10) patches [
-    set pcolor one-of [orange red green blue yellow white grey]
-  ]
+  ask patches [ set pcolor one-of [orange red green blue grey yellow white] ]
 end
 
 to go
   tick
-  let items-to-purchase any? shopping-list with [not member? ? shopping-cart]
-  if items-to-purchase
-  [
-    ask turtles
-    [
-      walk
-      shop
-    ]
-  ]
-  else
+  if ([xcor] of turtle 0 = 8) and ([ycor] of turtle 0 = 6)
   [
     stop
   ]
+  ask turtles
+  [
+    walk
+    shop
+  ]
 end
-
 
 ; agentska funkcija koja omogućava kretanje po trgovini
 to walk
-  let target-item one-of (shopping-list with [not member? ? shopping-cart])
-  let target-patch min-one-of (patches with [member? pcolor [orange red green blue yellow white grey]]) [
-    distance target-item
+    ifelse (any? patches with [pcolor = black]) ; provjerava ima li još neposjećenih mjesta u trgovini
+  [
+    let target-patch min-one-of (patches with [pcolor != black]) [distance myself] ; odabir najbližeg neoposjećenog mjesta
+    face target-patch
+    fd 1
   ]
-  face target-patch
-  fd 1
+  [
+    stop ; ako su sva mjesta posjećena, zaustavi kretanje
+  ]
 end
 
 ; agentska funkcija koja omogućava kupovinu proizvoda koji je na popisu
 ; za kupovinu a nije ranije dodan u kolica
 to shop
-  let current-patch patch-here
-  if (member? [pcolor] of current-patch shopping-list) and not (member? [pcolor] of current-patch shopping-cart)
+  show "cart"
+  show shopping-cart
+  show "list"
+  show shopping-list
+  if not empty? filter [itm -> not member? itm shopping-cart] shopping-list
   [
-    show (word "Item found at: " current-patch)
-    wait 1
-    set shopping-cart lput [pcolor] of current-patch shopping-cart
-    set pcolor black
-    show (word "Shopping cart: " shopping-cart)
+    let target-item one-of filter [itm -> not member? itm shopping-cart] shopping-list
+
+
+  if target-item != nobody
+  [
+    let target-color [pcolor] of patch-here
+    let potential-patches patches with [pcolor = target-color]
+
+    if any? potential-patches
+    [
+      let target-patch min-one-of potential-patches [distance myself]
+      face target-patch
+
+      ifelse target-color = pcolor
+      [
+        set shopping-cart lput target-item shopping-cart
+        set pcolor black
+        show shopping-cart
+      ]
+      [
+        show "Unexpected behavior!"
+      ]
+    ]
+  ]
   ]
 end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
