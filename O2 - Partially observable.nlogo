@@ -1,4 +1,4 @@
-globals [px py]
+globals [ px py ]
                          ;; globalna varijable za "crtanje" ceste
 
 breed [cars car]
@@ -15,9 +15,9 @@ to setup
   [
     set color blue       ;; vozila se boje plavom bojom
     set shape "car"      ;; daje im se oblik automobila
-    move-to one-of patches with [pcolor = gray and (any? other cars-here = false) ]
+    move-to one-of patches with [pcolor = gray and (one-of other cars-here = nobody) ]
                          ;; postavljaju se na cestu (siva celija)
-    set heading 90       ;; i okreću udesno
+    set heading 90       ;; i okrecu udesno
   ]
 
   create-obstacles 4
@@ -25,12 +25,12 @@ to setup
   [
     set color black
     set shape "x"
-    move-to one-of patches with [pcolor = gray and (any? other cars-here = false) and (any? other obstacles-here = false)]
+    move-to one-of patches with [pcolor = gray and (one-of other cars-here = nobody) and (one-of other obstacles-here = nobody)]
   ]
 
   ask patch 6 6
   [
-    set pcolor red       ;; pali se crveno svjetlo semafora
+    set pcolor red       ;; pali se srveno svjetlo semafora
   ]
 
   reset-ticks
@@ -39,27 +39,35 @@ end
 to go
   ask cars
   [
-    walk                 ;; pokreće se funkcija kretanja vozila
+    walk                 ;; pokrece se funkcija kretanja vozila
   ]
   ask patches
   [
-    stoplight            ;; pokreće se funkcija semafora
+    stoplight            ;; pokrece se funkcija semafora
   ]
   tick
 end
 
-to walk                  ;; funkcija kretanja vozila (agentska funkcija)
-  if any? other cars-here
-  [
-    ;;show "Crash!"
-    set color red
-  ]
+
+to walk
   if ([pcolor] of patch 6 5 = green)
-  ;; ako je na semaforu zeleno vozila se krecu
   [
-    fd 1
+    ;; Provjeri postoji li prepreka na trenutnoj traci
+    ifelse any? obstacles-on patch-here
+    [
+      ;; Mijenjaj smjer kako bi se automobil zaobišao prepreku
+      set color green
+      set heading 0
+      fd 1
+      set heading 90
+    ]
+    ;; Nema prepreka, idemo naprijed
+    [
+      fd 1
+    ]
   ]
 end
+
 
 
 to stoplight             ;; funkcija semafora (funkcija okruženja)
@@ -104,10 +112,6 @@ to draw-road             ;; funkcija crtanja ceste
     ]
   ]
 end
-
-
-
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210

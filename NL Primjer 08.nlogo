@@ -1,8 +1,8 @@
 ; liste agenta za popis za kupovinu i kolica sa kupljenim proizvodima
 turtles-own [
-              shopping-list
-              shopping-cart
-            ]
+  shopping-list
+  shopping-cart
+]
 
 to setup
   clear-all
@@ -12,15 +12,22 @@ to setup
   [
     set shopping-cart []
 
-    ; slučajno određivanje popisa za kupovinu
-    set shopping-list n-values (random 5) [ one-of ["Green" "Orange" "Blue" "Red" "Grey" "Yellow" "White"] ]
+    ; Slučajno generiranje popisa za kupovinu
+    set shopping-list []
+    repeat 4 [
+      let random-item one-of ["Green" "Orange" "Blue" "Red" "Grey" "Yellow" "White"]
+      set shopping-list lput random-item shopping-list
+    ]
+
     setxy -8 -6
     set heading 90
     show shopping-list
   ]
 
-  ; slučajno postavljanje "asortimana" trgovine
-  ask patches [ set pcolor one-of [orange red green blue grey yellow white] ]
+  ; Slučajno postavljanje "asortimana" trgovine
+  repeat 5 [
+    ask n-of 5 patches [ set pcolor one-of [orange red green blue yellow grey white] ]
+  ]
 end
 
 to go
@@ -36,55 +43,112 @@ to go
   ]
 end
 
+
 ; agentska funkcija koja omogućava kretanje po trgovini
 to walk
-    ifelse (any? patches with [pcolor = black]) ; provjerava ima li još neposjećenih mjesta u trgovini
+  ifelse (xcor = 8) and (heading = 90)
   [
-    let target-patch min-one-of (patches with [pcolor != black]) [distance myself] ; odabir najbližeg neoposjećenog mjesta
-    face target-patch
+    set heading 0
     fd 1
+    set heading 270
   ]
   [
-    stop ; ako su sva mjesta posjećena, zaustavi kretanje
+    ifelse (xcor = -8) and (heading = 270)
+    [
+      set heading 0
+      fd 1
+      set heading 90
+    ]
+    [
+      fd 1
+    ]
   ]
 end
+
+
+
 
 ; agentska funkcija koja omogućava kupovinu proizvoda koji je na popisu
 ; za kupovinu a nije ranije dodan u kolica
 to shop
-  show "cart"
-  show shopping-cart
-  show "list"
-  show shopping-list
-  if not empty? filter [itm -> not member? itm shopping-cart] shopping-list
+  if ([pcolor] of patch-here = orange)
   [
-    let target-item one-of filter [itm -> not member? itm shopping-cart] shopping-list
-
-
-  if target-item != nobody
-  [
-    let target-color [pcolor] of patch-here
-    let potential-patches patches with [pcolor = target-color]
-
-    if any? potential-patches
+    if (member? "Orange" shopping-list) and not (member? "Orange" shopping-cart)
     [
-      let target-patch min-one-of potential-patches [distance myself]
-      face target-patch
-
-      ifelse target-color = pcolor
-      [
-        set shopping-cart lput target-item shopping-cart
-        set pcolor black
-        show shopping-cart
-      ]
-      [
-        show "Unexpected behavior!"
-      ]
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "Orange" shopping-cart
+      set pcolor black
+      show shopping-cart
     ]
   ]
+  if ([pcolor] of patch-here = red)
+  [
+    if (member? "Red" shopping-list) and not (member? "Red" shopping-cart)
+    [
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "Red" shopping-cart
+      set pcolor black
+      show shopping-cart
+    ]
+  ]
+  if ([pcolor] of patch-here = green)
+  [
+    if (member? "Green" shopping-list) and not (member? "Green" shopping-cart)
+    [
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "Green" shopping-cart
+      set pcolor black
+      show shopping-cart
+    ]
+  ]
+  if ([pcolor] of patch-here = blue)
+  [
+    if (member? "Blue" shopping-list) and not (member? "Blue" shopping-cart)
+    [
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "Blue" shopping-cart
+      set pcolor black
+      show shopping-cart
+    ]
+  ]
+  if ([pcolor] of patch-here = grey)
+  [
+    if (member? "Grey" shopping-list) and not (member? "Grey" shopping-cart)
+    [
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "Grey" shopping-cart
+      set pcolor black
+      show shopping-cart
+    ]
+  ]
+  if ([pcolor] of patch-here = yellow)
+  [
+    if (member? "Yellow" shopping-list) and not (member? "Yellow" shopping-cart)
+    [
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "Yellow" shopping-cart
+      set pcolor black
+      show shopping-cart
+    ]
+  ]
+  if ([pcolor] of patch-here = white)
+  [
+    if (member? "White" shopping-list) and not (member? "White" shopping-cart)
+    [
+      show "Item found!"
+      wait 1
+      set shopping-cart lput "White" shopping-cart
+      set pcolor black
+      show shopping-cart
+    ]
   ]
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
